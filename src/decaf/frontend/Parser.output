@@ -1,0 +1,4290 @@
+   0  $accept : Program $end
+
+   1  Program : ClassList
+
+   2  ClassList : ClassList ClassDef
+   3            | ClassDef
+
+   4  VariableDef : Variable ';'
+
+   5  Variable : Type IDENTIFIER
+
+   6  Type : INT
+   7       | VOID
+   8       | BOOL
+   9       | STRING
+  10       | COMPLEX
+  11       | CLASS IDENTIFIER
+  12       | Type '[' ']'
+
+  13  ClassDef : CLASS IDENTIFIER ExtendsClause '{' FieldList '}'
+
+  14  ExtendsClause : EXTENDS IDENTIFIER
+  15                |
+
+  16  FieldList : FieldList VariableDef
+  17            | FieldList FunctionDef
+  18            |
+
+  19  Formals : VariableList
+  20          |
+
+  21  VariableList : VariableList ',' Variable
+  22               | Variable
+
+  23  FunctionDef : STATIC Type IDENTIFIER '(' Formals ')' StmtBlock
+  24              | Type IDENTIFIER '(' Formals ')' StmtBlock
+
+  25  StmtBlock : '{' StmtList '}'
+
+  26  StmtList : StmtList Stmt
+  27           |
+
+  28  Stmt : VariableDef
+  29       | SimpleStmt ';'
+  30       | IfStmt
+  31       | WhileStmt
+  32       | ForStmt
+  33       | ReturnStmt ';'
+  34       | PrintStmt ';'
+  35       | PrintCompStmt ';'
+  36       | BreakStmt ';'
+  37       | DoStmt ';'
+  38       | StmtBlock
+
+  39  SimpleStmt : LValue '=' Expr
+  40             | Call
+  41             |
+
+  42  Receiver : Expr '.'
+  43           |
+
+  44  LValue : Receiver IDENTIFIER
+  45         | Expr '[' Expr ']'
+
+  46  Call : Receiver IDENTIFIER '(' Actuals ')'
+
+  47  Expr : LValue
+  48       | Call
+  49       | Constant
+  50       | Case
+  51       | Expr '+' Expr
+  52       | Expr '-' Expr
+  53       | Expr '*' Expr
+  54       | Expr '/' Expr
+  55       | Expr '%' Expr
+  56       | Expr EQUAL Expr
+  57       | Expr NOT_EQUAL Expr
+  58       | Expr '<' Expr
+  59       | Expr '>' Expr
+  60       | Expr LESS_EQUAL Expr
+  61       | Expr GREATER_EQUAL Expr
+  62       | Expr AND Expr
+  63       | Expr OR Expr
+  64       | '(' Expr ')'
+  65       | '-' Expr
+  66       | '!' Expr
+  67       | '@' Expr
+  68       | '$' Expr
+  69       | '#' Expr
+  70       | READ_INTEGER '(' ')'
+  71       | READ_LINE '(' ')'
+  72       | THIS
+  73       | SUPER
+  74       | NEW IDENTIFIER '(' ')'
+  75       | NEW Type '[' Expr ']'
+  76       | INSTANCEOF '(' Expr ',' IDENTIFIER ')'
+  77       | '(' CLASS IDENTIFIER ')' Expr
+  78       | DCOPY '(' Expr ')'
+  79       | SCOPY '(' Expr ')'
+
+  80  Constant : LITERAL
+  81           | NULL
+
+  82  Actuals : ExprList
+  83          |
+
+  84  ExprList : ExprList ',' Expr
+  85           | Expr
+
+  86  WhileStmt : WHILE '(' Expr ')' Stmt
+
+  87  ForStmt : FOR '(' SimpleStmt ';' Expr ';' SimpleStmt ')' Stmt
+
+  88  Case : CASE '(' Expr ')' '{' CasesList DefaultItem '}'
+
+  89  CasesList : CasesList CaseItem
+  90            |
+
+  91  CaseItem : Constant ':' Expr ';'
+
+  92  DefaultItem : DEFAULT ':' Expr ';'
+
+  93  BreakStmt : BREAK
+
+  94  IfStmt : IF '(' Expr ')' Stmt ElseClause
+
+  95  ElseClause : ELSE Stmt
+  96             |
+
+  97  ReturnStmt : RETURN Expr
+  98             | RETURN
+
+  99  PrintStmt : PRINT '(' ExprList ')'
+
+ 100  PrintCompStmt : PRINTCOMP '(' ExprList ')'
+
+ 101  DoStmt : DO DoBranch OD
+
+ 102  DoBranch : DoBranch DOSEPARATOR DoSubStmt
+ 103           | DoSubStmt
+
+ 104  DoSubStmt : Expr ':' Stmt
+
+state 0
+	$accept : . Program $end  (0)
+
+	CLASS  shift 1
+	.  error
+
+	Program  goto 2
+	ClassList  goto 3
+	ClassDef  goto 4
+
+
+state 1
+	ClassDef : CLASS . IDENTIFIER ExtendsClause '{' FieldList '}'  (13)
+
+	IDENTIFIER  shift 5
+	.  error
+
+
+state 2
+	$accept : Program . $end  (0)
+
+	$end  accept
+
+
+state 3
+	Program : ClassList .  (1)
+	ClassList : ClassList . ClassDef  (2)
+
+	CLASS  shift 1
+	$end  reduce 1
+
+	ClassDef  goto 6
+
+
+state 4
+	ClassList : ClassDef .  (3)
+
+	.  reduce 3
+
+
+state 5
+	ClassDef : CLASS IDENTIFIER . ExtendsClause '{' FieldList '}'  (13)
+	ExtendsClause : .  (15)
+
+	EXTENDS  shift 7
+	'{'  reduce 15
+
+	ExtendsClause  goto 8
+
+
+state 6
+	ClassList : ClassList ClassDef .  (2)
+
+	.  reduce 2
+
+
+state 7
+	ExtendsClause : EXTENDS . IDENTIFIER  (14)
+
+	IDENTIFIER  shift 9
+	.  error
+
+
+state 8
+	ClassDef : CLASS IDENTIFIER ExtendsClause . '{' FieldList '}'  (13)
+
+	'{'  shift 10
+	.  error
+
+
+state 9
+	ExtendsClause : EXTENDS IDENTIFIER .  (14)
+
+	.  reduce 14
+
+
+state 10
+	ClassDef : CLASS IDENTIFIER ExtendsClause '{' . FieldList '}'  (13)
+	FieldList : .  (18)
+
+	.  reduce 18
+
+	FieldList  goto 11
+
+
+state 11
+	ClassDef : CLASS IDENTIFIER ExtendsClause '{' FieldList . '}'  (13)
+	FieldList : FieldList . VariableDef  (16)
+	FieldList : FieldList . FunctionDef  (17)
+
+	VOID  shift 12
+	BOOL  shift 13
+	INT  shift 14
+	STRING  shift 15
+	CLASS  shift 16
+	STATIC  shift 17
+	'}'  shift 18
+	COMPLEX  shift 19
+	.  error
+
+	VariableDef  goto 20
+	Variable  goto 21
+	Type  goto 22
+	FunctionDef  goto 23
+
+
+state 12
+	Type : VOID .  (7)
+
+	.  reduce 7
+
+
+state 13
+	Type : BOOL .  (8)
+
+	.  reduce 8
+
+
+state 14
+	Type : INT .  (6)
+
+	.  reduce 6
+
+
+state 15
+	Type : STRING .  (9)
+
+	.  reduce 9
+
+
+state 16
+	Type : CLASS . IDENTIFIER  (11)
+
+	IDENTIFIER  shift 24
+	.  error
+
+
+state 17
+	FunctionDef : STATIC . Type IDENTIFIER '(' Formals ')' StmtBlock  (23)
+
+	VOID  shift 12
+	BOOL  shift 13
+	INT  shift 14
+	STRING  shift 15
+	CLASS  shift 16
+	COMPLEX  shift 19
+	.  error
+
+	Type  goto 25
+
+
+state 18
+	ClassDef : CLASS IDENTIFIER ExtendsClause '{' FieldList '}' .  (13)
+
+	.  reduce 13
+
+
+state 19
+	Type : COMPLEX .  (10)
+
+	.  reduce 10
+
+
+state 20
+	FieldList : FieldList VariableDef .  (16)
+
+	.  reduce 16
+
+
+state 21
+	VariableDef : Variable . ';'  (4)
+
+	';'  shift 26
+	.  error
+
+
+state 22
+	Variable : Type . IDENTIFIER  (5)
+	Type : Type . '[' ']'  (12)
+	FunctionDef : Type . IDENTIFIER '(' Formals ')' StmtBlock  (24)
+
+	IDENTIFIER  shift 27
+	'['  shift 28
+	.  error
+
+
+state 23
+	FieldList : FieldList FunctionDef .  (17)
+
+	.  reduce 17
+
+
+state 24
+	Type : CLASS IDENTIFIER .  (11)
+
+	.  reduce 11
+
+
+state 25
+	Type : Type . '[' ']'  (12)
+	FunctionDef : STATIC Type . IDENTIFIER '(' Formals ')' StmtBlock  (23)
+
+	IDENTIFIER  shift 29
+	'['  shift 28
+	.  error
+
+
+state 26
+	VariableDef : Variable ';' .  (4)
+
+	.  reduce 4
+
+
+state 27
+	Variable : Type IDENTIFIER .  (5)
+	FunctionDef : Type IDENTIFIER . '(' Formals ')' StmtBlock  (24)
+
+	'('  shift 30
+	';'  reduce 5
+
+
+state 28
+	Type : Type '[' . ']'  (12)
+
+	']'  shift 31
+	.  error
+
+
+state 29
+	FunctionDef : STATIC Type IDENTIFIER . '(' Formals ')' StmtBlock  (23)
+
+	'('  shift 32
+	.  error
+
+
+state 30
+	FunctionDef : Type IDENTIFIER '(' . Formals ')' StmtBlock  (24)
+	Formals : .  (20)
+
+	VOID  shift 12
+	BOOL  shift 13
+	INT  shift 14
+	STRING  shift 15
+	CLASS  shift 16
+	COMPLEX  shift 19
+	')'  reduce 20
+
+	Variable  goto 33
+	Type  goto 34
+	Formals  goto 35
+	VariableList  goto 36
+
+
+state 31
+	Type : Type '[' ']' .  (12)
+
+	.  reduce 12
+
+
+state 32
+	FunctionDef : STATIC Type IDENTIFIER '(' . Formals ')' StmtBlock  (23)
+	Formals : .  (20)
+
+	VOID  shift 12
+	BOOL  shift 13
+	INT  shift 14
+	STRING  shift 15
+	CLASS  shift 16
+	COMPLEX  shift 19
+	')'  reduce 20
+
+	Variable  goto 33
+	Type  goto 34
+	Formals  goto 37
+	VariableList  goto 36
+
+
+state 33
+	VariableList : Variable .  (22)
+
+	.  reduce 22
+
+
+state 34
+	Variable : Type . IDENTIFIER  (5)
+	Type : Type . '[' ']'  (12)
+
+	IDENTIFIER  shift 38
+	'['  shift 28
+	.  error
+
+
+state 35
+	FunctionDef : Type IDENTIFIER '(' Formals . ')' StmtBlock  (24)
+
+	')'  shift 39
+	.  error
+
+
+state 36
+	Formals : VariableList .  (19)
+	VariableList : VariableList . ',' Variable  (21)
+
+	','  shift 40
+	')'  reduce 19
+
+
+state 37
+	FunctionDef : STATIC Type IDENTIFIER '(' Formals . ')' StmtBlock  (23)
+
+	')'  shift 41
+	.  error
+
+
+state 38
+	Variable : Type IDENTIFIER .  (5)
+
+	.  reduce 5
+
+
+state 39
+	FunctionDef : Type IDENTIFIER '(' Formals ')' . StmtBlock  (24)
+
+	'{'  shift 42
+	.  error
+
+	StmtBlock  goto 43
+
+
+state 40
+	VariableList : VariableList ',' . Variable  (21)
+
+	VOID  shift 12
+	BOOL  shift 13
+	INT  shift 14
+	STRING  shift 15
+	CLASS  shift 16
+	COMPLEX  shift 19
+	.  error
+
+	Variable  goto 44
+	Type  goto 34
+
+
+state 41
+	FunctionDef : STATIC Type IDENTIFIER '(' Formals ')' . StmtBlock  (23)
+
+	'{'  shift 42
+	.  error
+
+	StmtBlock  goto 45
+
+
+state 42
+	StmtBlock : '{' . StmtList '}'  (25)
+	StmtList : .  (27)
+
+	.  reduce 27
+
+	StmtList  goto 46
+
+
+state 43
+	FunctionDef : Type IDENTIFIER '(' Formals ')' StmtBlock .  (24)
+
+	.  reduce 24
+
+
+state 44
+	VariableList : VariableList ',' Variable .  (21)
+
+	.  reduce 21
+
+
+state 45
+	FunctionDef : STATIC Type IDENTIFIER '(' Formals ')' StmtBlock .  (23)
+
+	.  reduce 23
+
+
+state 46
+	StmtBlock : '{' StmtList . '}'  (25)
+	StmtList : StmtList . Stmt  (26)
+	SimpleStmt : .  (41)
+	Receiver : .  (43)
+
+	VOID  shift 12
+	BOOL  shift 13
+	INT  shift 14
+	STRING  shift 15
+	CLASS  shift 16
+	NULL  shift 47
+	THIS  shift 48
+	WHILE  shift 49
+	FOR  shift 50
+	IF  shift 51
+	RETURN  shift 52
+	BREAK  shift 53
+	NEW  shift 54
+	PRINT  shift 55
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'{'  shift 42
+	'}'  shift 63
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	COMPLEX  shift 19
+	PRINTCOMP  shift 67
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	DO  shift 72
+	IDENTIFIER  reduce 43
+	';'  reduce 41
+
+	VariableDef  goto 73
+	Variable  goto 21
+	Type  goto 34
+	StmtBlock  goto 74
+	Stmt  goto 75
+	SimpleStmt  goto 76
+	IfStmt  goto 77
+	WhileStmt  goto 78
+	ForStmt  goto 79
+	ReturnStmt  goto 80
+	PrintStmt  goto 81
+	PrintCompStmt  goto 82
+	BreakStmt  goto 83
+	DoStmt  goto 84
+	LValue  goto 85
+	Expr  goto 86
+	Call  goto 87
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 47
+	Constant : NULL .  (81)
+
+	.  reduce 81
+
+
+state 48
+	Expr : THIS .  (72)
+
+	.  reduce 72
+
+
+state 49
+	WhileStmt : WHILE . '(' Expr ')' Stmt  (86)
+
+	'('  shift 91
+	.  error
+
+
+state 50
+	ForStmt : FOR . '(' SimpleStmt ';' Expr ';' SimpleStmt ')' Stmt  (87)
+
+	'('  shift 92
+	.  error
+
+
+state 51
+	IfStmt : IF . '(' Expr ')' Stmt ElseClause  (94)
+
+	'('  shift 93
+	.  error
+
+
+state 52
+	ReturnStmt : RETURN . Expr  (97)
+	ReturnStmt : RETURN .  (98)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+	';'  reduce 98
+
+	LValue  goto 94
+	Expr  goto 95
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 53
+	BreakStmt : BREAK .  (93)
+
+	.  reduce 93
+
+
+state 54
+	Expr : NEW . IDENTIFIER '(' ')'  (74)
+	Expr : NEW . Type '[' Expr ']'  (75)
+
+	VOID  shift 12
+	BOOL  shift 13
+	INT  shift 14
+	STRING  shift 15
+	CLASS  shift 16
+	IDENTIFIER  shift 97
+	COMPLEX  shift 19
+	.  error
+
+	Type  goto 98
+
+
+state 55
+	PrintStmt : PRINT . '(' ExprList ')'  (99)
+
+	'('  shift 99
+	.  error
+
+
+state 56
+	Expr : READ_INTEGER . '(' ')'  (70)
+
+	'('  shift 100
+	.  error
+
+
+state 57
+	Expr : READ_LINE . '(' ')'  (71)
+
+	'('  shift 101
+	.  error
+
+
+state 58
+	Constant : LITERAL .  (80)
+
+	.  reduce 80
+
+
+state 59
+	Expr : INSTANCEOF . '(' Expr ',' IDENTIFIER ')'  (76)
+
+	'('  shift 102
+	.  error
+
+
+state 60
+	Expr : '-' . Expr  (65)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 103
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 61
+	Expr : '!' . Expr  (66)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 104
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 62
+	Expr : '(' . Expr ')'  (64)
+	Expr : '(' . CLASS IDENTIFIER ')' Expr  (77)
+	Receiver : .  (43)
+
+	CLASS  shift 105
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 106
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 63
+	StmtBlock : '{' StmtList '}' .  (25)
+
+	.  reduce 25
+
+
+state 64
+	Expr : '@' . Expr  (67)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 107
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 65
+	Expr : '$' . Expr  (68)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 108
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 66
+	Expr : '#' . Expr  (69)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 109
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 67
+	PrintCompStmt : PRINTCOMP . '(' ExprList ')'  (100)
+
+	'('  shift 110
+	.  error
+
+
+state 68
+	Case : CASE . '(' Expr ')' '{' CasesList DefaultItem '}'  (88)
+
+	'('  shift 111
+	.  error
+
+
+state 69
+	Expr : SUPER .  (73)
+
+	.  reduce 73
+
+
+state 70
+	Expr : DCOPY . '(' Expr ')'  (78)
+
+	'('  shift 112
+	.  error
+
+
+state 71
+	Expr : SCOPY . '(' Expr ')'  (79)
+
+	'('  shift 113
+	.  error
+
+
+state 72
+	DoStmt : DO . DoBranch OD  (101)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 114
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+	DoBranch  goto 115
+	DoSubStmt  goto 116
+
+
+state 73
+	Stmt : VariableDef .  (28)
+
+	.  reduce 28
+
+
+state 74
+	Stmt : StmtBlock .  (38)
+
+	.  reduce 38
+
+
+state 75
+	StmtList : StmtList Stmt .  (26)
+
+	.  reduce 26
+
+
+state 76
+	Stmt : SimpleStmt . ';'  (29)
+
+	';'  shift 117
+	.  error
+
+
+state 77
+	Stmt : IfStmt .  (30)
+
+	.  reduce 30
+
+
+state 78
+	Stmt : WhileStmt .  (31)
+
+	.  reduce 31
+
+
+state 79
+	Stmt : ForStmt .  (32)
+
+	.  reduce 32
+
+
+state 80
+	Stmt : ReturnStmt . ';'  (33)
+
+	';'  shift 118
+	.  error
+
+
+state 81
+	Stmt : PrintStmt . ';'  (34)
+
+	';'  shift 119
+	.  error
+
+
+state 82
+	Stmt : PrintCompStmt . ';'  (35)
+
+	';'  shift 120
+	.  error
+
+
+state 83
+	Stmt : BreakStmt . ';'  (36)
+
+	';'  shift 121
+	.  error
+
+
+state 84
+	Stmt : DoStmt . ';'  (37)
+
+	';'  shift 122
+	.  error
+
+
+state 85
+	SimpleStmt : LValue . '=' Expr  (39)
+	Expr : LValue .  (47)
+
+	'='  shift 123
+	AND  reduce 47
+	OR  reduce 47
+	LESS_EQUAL  reduce 47
+	GREATER_EQUAL  reduce 47
+	EQUAL  reduce 47
+	NOT_EQUAL  reduce 47
+	'+'  reduce 47
+	'-'  reduce 47
+	'*'  reduce 47
+	'/'  reduce 47
+	'%'  reduce 47
+	'>'  reduce 47
+	'<'  reduce 47
+	'.'  reduce 47
+	'['  reduce 47
+
+
+state 86
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	'['  shift 138
+	.  error
+
+
+state 87
+	SimpleStmt : Call .  (40)
+	Expr : Call .  (48)
+
+	AND  reduce 48
+	OR  reduce 48
+	LESS_EQUAL  reduce 48
+	GREATER_EQUAL  reduce 48
+	EQUAL  reduce 48
+	NOT_EQUAL  reduce 48
+	'+'  reduce 48
+	'-'  reduce 48
+	'*'  reduce 48
+	'/'  reduce 48
+	'%'  reduce 48
+	'>'  reduce 48
+	'<'  reduce 48
+	'.'  reduce 48
+	';'  reduce 40
+	')'  reduce 40
+	'['  reduce 48
+
+
+state 88
+	LValue : Receiver . IDENTIFIER  (44)
+	Call : Receiver . IDENTIFIER '(' Actuals ')'  (46)
+
+	IDENTIFIER  shift 139
+	.  error
+
+
+state 89
+	Expr : Constant .  (49)
+
+	.  reduce 49
+
+
+state 90
+	Expr : Case .  (50)
+
+	.  reduce 50
+
+
+state 91
+	WhileStmt : WHILE '(' . Expr ')' Stmt  (86)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 140
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 92
+	ForStmt : FOR '(' . SimpleStmt ';' Expr ';' SimpleStmt ')' Stmt  (87)
+	SimpleStmt : .  (41)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+	';'  reduce 41
+
+	SimpleStmt  goto 141
+	LValue  goto 85
+	Expr  goto 86
+	Call  goto 87
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 93
+	IfStmt : IF '(' . Expr ')' Stmt ElseClause  (94)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 142
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 94
+	Expr : LValue .  (47)
+
+	.  reduce 47
+
+
+state 95
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	ReturnStmt : RETURN Expr .  (97)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	'['  shift 138
+	';'  reduce 97
+
+
+state 96
+	Expr : Call .  (48)
+
+	.  reduce 48
+
+
+state 97
+	Expr : NEW IDENTIFIER . '(' ')'  (74)
+
+	'('  shift 143
+	.  error
+
+
+state 98
+	Type : Type . '[' ']'  (12)
+	Expr : NEW Type . '[' Expr ']'  (75)
+
+	'['  shift 144
+	.  error
+
+
+state 99
+	PrintStmt : PRINT '(' . ExprList ')'  (99)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 145
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+	ExprList  goto 146
+
+
+state 100
+	Expr : READ_INTEGER '(' . ')'  (70)
+
+	')'  shift 147
+	.  error
+
+
+state 101
+	Expr : READ_LINE '(' . ')'  (71)
+
+	')'  shift 148
+	.  error
+
+
+state 102
+	Expr : INSTANCEOF '(' . Expr ',' IDENTIFIER ')'  (76)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 149
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 103
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	Expr : '-' Expr .  (65)
+
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 65
+	OR  reduce 65
+	LESS_EQUAL  reduce 65
+	GREATER_EQUAL  reduce 65
+	EQUAL  reduce 65
+	NOT_EQUAL  reduce 65
+	'+'  reduce 65
+	'-'  reduce 65
+	'*'  reduce 65
+	'/'  reduce 65
+	'%'  reduce 65
+	'>'  reduce 65
+	'<'  reduce 65
+	','  reduce 65
+	';'  reduce 65
+	')'  reduce 65
+	']'  reduce 65
+	':'  reduce 65
+
+
+state 104
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	Expr : '!' Expr .  (66)
+
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 66
+	OR  reduce 66
+	LESS_EQUAL  reduce 66
+	GREATER_EQUAL  reduce 66
+	EQUAL  reduce 66
+	NOT_EQUAL  reduce 66
+	'+'  reduce 66
+	'-'  reduce 66
+	'*'  reduce 66
+	'/'  reduce 66
+	'%'  reduce 66
+	'>'  reduce 66
+	'<'  reduce 66
+	','  reduce 66
+	';'  reduce 66
+	')'  reduce 66
+	']'  reduce 66
+	':'  reduce 66
+
+
+state 105
+	Expr : '(' CLASS . IDENTIFIER ')' Expr  (77)
+
+	IDENTIFIER  shift 150
+	.  error
+
+
+state 106
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	Expr : '(' Expr . ')'  (64)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	')'  shift 151
+	'['  shift 138
+	.  error
+
+
+state 107
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	Expr : '@' Expr .  (67)
+
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 67
+	OR  reduce 67
+	LESS_EQUAL  reduce 67
+	GREATER_EQUAL  reduce 67
+	EQUAL  reduce 67
+	NOT_EQUAL  reduce 67
+	'+'  reduce 67
+	'-'  reduce 67
+	'*'  reduce 67
+	'/'  reduce 67
+	'%'  reduce 67
+	'>'  reduce 67
+	'<'  reduce 67
+	','  reduce 67
+	';'  reduce 67
+	')'  reduce 67
+	']'  reduce 67
+	':'  reduce 67
+
+
+state 108
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	Expr : '$' Expr .  (68)
+
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 68
+	OR  reduce 68
+	LESS_EQUAL  reduce 68
+	GREATER_EQUAL  reduce 68
+	EQUAL  reduce 68
+	NOT_EQUAL  reduce 68
+	'+'  reduce 68
+	'-'  reduce 68
+	'*'  reduce 68
+	'/'  reduce 68
+	'%'  reduce 68
+	'>'  reduce 68
+	'<'  reduce 68
+	','  reduce 68
+	';'  reduce 68
+	')'  reduce 68
+	']'  reduce 68
+	':'  reduce 68
+
+
+state 109
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	Expr : '#' Expr .  (69)
+
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 69
+	OR  reduce 69
+	LESS_EQUAL  reduce 69
+	GREATER_EQUAL  reduce 69
+	EQUAL  reduce 69
+	NOT_EQUAL  reduce 69
+	'+'  reduce 69
+	'-'  reduce 69
+	'*'  reduce 69
+	'/'  reduce 69
+	'%'  reduce 69
+	'>'  reduce 69
+	'<'  reduce 69
+	','  reduce 69
+	';'  reduce 69
+	')'  reduce 69
+	']'  reduce 69
+	':'  reduce 69
+
+
+state 110
+	PrintCompStmt : PRINTCOMP '(' . ExprList ')'  (100)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 145
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+	ExprList  goto 152
+
+
+state 111
+	Case : CASE '(' . Expr ')' '{' CasesList DefaultItem '}'  (88)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 153
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 112
+	Expr : DCOPY '(' . Expr ')'  (78)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 154
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 113
+	Expr : SCOPY '(' . Expr ')'  (79)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 155
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 114
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	DoSubStmt : Expr . ':' Stmt  (104)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	'['  shift 138
+	':'  shift 156
+	.  error
+
+
+state 115
+	DoStmt : DO DoBranch . OD  (101)
+	DoBranch : DoBranch . DOSEPARATOR DoSubStmt  (102)
+
+	OD  shift 157
+	DOSEPARATOR  shift 158
+	.  error
+
+
+state 116
+	DoBranch : DoSubStmt .  (103)
+
+	.  reduce 103
+
+
+state 117
+	Stmt : SimpleStmt ';' .  (29)
+
+	.  reduce 29
+
+
+state 118
+	Stmt : ReturnStmt ';' .  (33)
+
+	.  reduce 33
+
+
+state 119
+	Stmt : PrintStmt ';' .  (34)
+
+	.  reduce 34
+
+
+state 120
+	Stmt : PrintCompStmt ';' .  (35)
+
+	.  reduce 35
+
+
+state 121
+	Stmt : BreakStmt ';' .  (36)
+
+	.  reduce 36
+
+
+state 122
+	Stmt : DoStmt ';' .  (37)
+
+	.  reduce 37
+
+
+state 123
+	SimpleStmt : LValue '=' . Expr  (39)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 159
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 124
+	Expr : Expr AND . Expr  (62)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 160
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 125
+	Expr : Expr OR . Expr  (63)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 161
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 126
+	Expr : Expr LESS_EQUAL . Expr  (60)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 162
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 127
+	Expr : Expr GREATER_EQUAL . Expr  (61)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 163
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 128
+	Expr : Expr EQUAL . Expr  (56)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 164
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 129
+	Expr : Expr NOT_EQUAL . Expr  (57)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 165
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 130
+	Expr : Expr '+' . Expr  (51)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 166
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 131
+	Expr : Expr '-' . Expr  (52)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 167
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 132
+	Expr : Expr '*' . Expr  (53)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 168
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 133
+	Expr : Expr '/' . Expr  (54)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 169
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 134
+	Expr : Expr '%' . Expr  (55)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 170
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 135
+	Expr : Expr '>' . Expr  (59)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 171
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 136
+	Expr : Expr '<' . Expr  (58)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 172
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 137
+	Receiver : Expr '.' .  (42)
+
+	.  reduce 42
+
+
+state 138
+	LValue : Expr '[' . Expr ']'  (45)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 173
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 139
+	LValue : Receiver IDENTIFIER .  (44)
+	Call : Receiver IDENTIFIER . '(' Actuals ')'  (46)
+
+	'('  shift 174
+	AND  reduce 44
+	OR  reduce 44
+	LESS_EQUAL  reduce 44
+	GREATER_EQUAL  reduce 44
+	EQUAL  reduce 44
+	NOT_EQUAL  reduce 44
+	'+'  reduce 44
+	'-'  reduce 44
+	'*'  reduce 44
+	'/'  reduce 44
+	'%'  reduce 44
+	'='  reduce 44
+	'>'  reduce 44
+	'<'  reduce 44
+	'.'  reduce 44
+	','  reduce 44
+	';'  reduce 44
+	')'  reduce 44
+	'['  reduce 44
+	']'  reduce 44
+	':'  reduce 44
+
+
+state 140
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	WhileStmt : WHILE '(' Expr . ')' Stmt  (86)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	')'  shift 175
+	'['  shift 138
+	.  error
+
+
+state 141
+	ForStmt : FOR '(' SimpleStmt . ';' Expr ';' SimpleStmt ')' Stmt  (87)
+
+	';'  shift 176
+	.  error
+
+
+state 142
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	IfStmt : IF '(' Expr . ')' Stmt ElseClause  (94)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	')'  shift 177
+	'['  shift 138
+	.  error
+
+
+state 143
+	Expr : NEW IDENTIFIER '(' . ')'  (74)
+
+	')'  shift 178
+	.  error
+
+
+state 144
+	Type : Type '[' . ']'  (12)
+	Expr : NEW Type '[' . Expr ']'  (75)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	']'  shift 31
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 179
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 145
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	ExprList : Expr .  (85)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	'['  shift 138
+	','  reduce 85
+	')'  reduce 85
+
+
+state 146
+	ExprList : ExprList . ',' Expr  (84)
+	PrintStmt : PRINT '(' ExprList . ')'  (99)
+
+	','  shift 180
+	')'  shift 181
+	.  error
+
+
+state 147
+	Expr : READ_INTEGER '(' ')' .  (70)
+
+	.  reduce 70
+
+
+state 148
+	Expr : READ_LINE '(' ')' .  (71)
+
+	.  reduce 71
+
+
+state 149
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	Expr : INSTANCEOF '(' Expr . ',' IDENTIFIER ')'  (76)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	','  shift 182
+	'['  shift 138
+	.  error
+
+
+state 150
+	Expr : '(' CLASS IDENTIFIER . ')' Expr  (77)
+
+	')'  shift 183
+	.  error
+
+
+state 151
+	Expr : '(' Expr ')' .  (64)
+
+	.  reduce 64
+
+
+state 152
+	ExprList : ExprList . ',' Expr  (84)
+	PrintCompStmt : PRINTCOMP '(' ExprList . ')'  (100)
+
+	','  shift 180
+	')'  shift 184
+	.  error
+
+
+state 153
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	Case : CASE '(' Expr . ')' '{' CasesList DefaultItem '}'  (88)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	')'  shift 185
+	'['  shift 138
+	.  error
+
+
+state 154
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	Expr : DCOPY '(' Expr . ')'  (78)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	')'  shift 186
+	'['  shift 138
+	.  error
+
+
+state 155
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	Expr : SCOPY '(' Expr . ')'  (79)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	')'  shift 187
+	'['  shift 138
+	.  error
+
+
+state 156
+	DoSubStmt : Expr ':' . Stmt  (104)
+	SimpleStmt : .  (41)
+	Receiver : .  (43)
+
+	VOID  shift 12
+	BOOL  shift 13
+	INT  shift 14
+	STRING  shift 15
+	CLASS  shift 16
+	NULL  shift 47
+	THIS  shift 48
+	WHILE  shift 49
+	FOR  shift 50
+	IF  shift 51
+	RETURN  shift 52
+	BREAK  shift 53
+	NEW  shift 54
+	PRINT  shift 55
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'{'  shift 42
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	COMPLEX  shift 19
+	PRINTCOMP  shift 67
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	DO  shift 72
+	IDENTIFIER  reduce 43
+	';'  reduce 41
+
+	VariableDef  goto 73
+	Variable  goto 21
+	Type  goto 34
+	StmtBlock  goto 74
+	Stmt  goto 188
+	SimpleStmt  goto 76
+	IfStmt  goto 77
+	WhileStmt  goto 78
+	ForStmt  goto 79
+	ReturnStmt  goto 80
+	PrintStmt  goto 81
+	PrintCompStmt  goto 82
+	BreakStmt  goto 83
+	DoStmt  goto 84
+	LValue  goto 85
+	Expr  goto 86
+	Call  goto 87
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 157
+	DoStmt : DO DoBranch OD .  (101)
+
+	.  reduce 101
+
+
+state 158
+	DoBranch : DoBranch DOSEPARATOR . DoSubStmt  (102)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 114
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+	DoSubStmt  goto 189
+
+
+state 159
+	SimpleStmt : LValue '=' Expr .  (39)
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	'['  shift 138
+	';'  reduce 39
+	')'  reduce 39
+
+
+state 160
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr AND Expr .  (62)
+	Expr : Expr . OR Expr  (63)
+
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 62
+	OR  reduce 62
+	','  reduce 62
+	';'  reduce 62
+	')'  reduce 62
+	']'  reduce 62
+	':'  reduce 62
+
+
+state 161
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	Expr : Expr OR Expr .  (63)
+
+	AND  shift 124
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	'['  shift 138
+	OR  reduce 63
+	','  reduce 63
+	';'  reduce 63
+	')'  reduce 63
+	']'  reduce 63
+	':'  reduce 63
+
+
+state 162
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr LESS_EQUAL Expr .  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 60
+	OR  reduce 60
+	EQUAL  reduce 60
+	NOT_EQUAL  reduce 60
+	','  reduce 60
+	';'  reduce 60
+	')'  reduce 60
+	']'  reduce 60
+	':'  reduce 60
+
+
+state 163
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr GREATER_EQUAL Expr .  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 61
+	OR  reduce 61
+	EQUAL  reduce 61
+	NOT_EQUAL  reduce 61
+	','  reduce 61
+	';'  reduce 61
+	')'  reduce 61
+	']'  reduce 61
+	':'  reduce 61
+
+
+state 164
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr EQUAL Expr .  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 56
+	OR  reduce 56
+	','  reduce 56
+	';'  reduce 56
+	')'  reduce 56
+	']'  reduce 56
+	':'  reduce 56
+
+
+state 165
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr NOT_EQUAL Expr .  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 57
+	OR  reduce 57
+	','  reduce 57
+	';'  reduce 57
+	')'  reduce 57
+	']'  reduce 57
+	':'  reduce 57
+
+
+state 166
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr '+' Expr .  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 51
+	OR  reduce 51
+	LESS_EQUAL  reduce 51
+	GREATER_EQUAL  reduce 51
+	EQUAL  reduce 51
+	NOT_EQUAL  reduce 51
+	'+'  reduce 51
+	'-'  reduce 51
+	'>'  reduce 51
+	'<'  reduce 51
+	','  reduce 51
+	';'  reduce 51
+	')'  reduce 51
+	']'  reduce 51
+	':'  reduce 51
+
+
+state 167
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr '-' Expr .  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 52
+	OR  reduce 52
+	LESS_EQUAL  reduce 52
+	GREATER_EQUAL  reduce 52
+	EQUAL  reduce 52
+	NOT_EQUAL  reduce 52
+	'+'  reduce 52
+	'-'  reduce 52
+	'>'  reduce 52
+	'<'  reduce 52
+	','  reduce 52
+	';'  reduce 52
+	')'  reduce 52
+	']'  reduce 52
+	':'  reduce 52
+
+
+state 168
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr '*' Expr .  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 53
+	OR  reduce 53
+	LESS_EQUAL  reduce 53
+	GREATER_EQUAL  reduce 53
+	EQUAL  reduce 53
+	NOT_EQUAL  reduce 53
+	'+'  reduce 53
+	'-'  reduce 53
+	'*'  reduce 53
+	'/'  reduce 53
+	'%'  reduce 53
+	'>'  reduce 53
+	'<'  reduce 53
+	','  reduce 53
+	';'  reduce 53
+	')'  reduce 53
+	']'  reduce 53
+	':'  reduce 53
+
+
+state 169
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr '/' Expr .  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 54
+	OR  reduce 54
+	LESS_EQUAL  reduce 54
+	GREATER_EQUAL  reduce 54
+	EQUAL  reduce 54
+	NOT_EQUAL  reduce 54
+	'+'  reduce 54
+	'-'  reduce 54
+	'*'  reduce 54
+	'/'  reduce 54
+	'%'  reduce 54
+	'>'  reduce 54
+	'<'  reduce 54
+	','  reduce 54
+	';'  reduce 54
+	')'  reduce 54
+	']'  reduce 54
+	':'  reduce 54
+
+
+state 170
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr '%' Expr .  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 55
+	OR  reduce 55
+	LESS_EQUAL  reduce 55
+	GREATER_EQUAL  reduce 55
+	EQUAL  reduce 55
+	NOT_EQUAL  reduce 55
+	'+'  reduce 55
+	'-'  reduce 55
+	'*'  reduce 55
+	'/'  reduce 55
+	'%'  reduce 55
+	'>'  reduce 55
+	'<'  reduce 55
+	','  reduce 55
+	';'  reduce 55
+	')'  reduce 55
+	']'  reduce 55
+	':'  reduce 55
+
+
+state 171
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr '>' Expr .  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 59
+	OR  reduce 59
+	EQUAL  reduce 59
+	NOT_EQUAL  reduce 59
+	','  reduce 59
+	';'  reduce 59
+	')'  reduce 59
+	']'  reduce 59
+	':'  reduce 59
+
+
+state 172
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr '<' Expr .  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'.'  shift 137
+	'['  shift 138
+	AND  reduce 58
+	OR  reduce 58
+	EQUAL  reduce 58
+	NOT_EQUAL  reduce 58
+	','  reduce 58
+	';'  reduce 58
+	')'  reduce 58
+	']'  reduce 58
+	':'  reduce 58
+
+
+state 173
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	LValue : Expr '[' Expr . ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	'['  shift 138
+	']'  shift 190
+	.  error
+
+
+state 174
+	Call : Receiver IDENTIFIER '(' . Actuals ')'  (46)
+	Receiver : .  (43)
+	Actuals : .  (83)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+	')'  reduce 83
+
+	LValue  goto 94
+	Expr  goto 145
+	Call  goto 96
+	Receiver  goto 88
+	Actuals  goto 191
+	Constant  goto 89
+	Case  goto 90
+	ExprList  goto 192
+
+
+state 175
+	WhileStmt : WHILE '(' Expr ')' . Stmt  (86)
+	SimpleStmt : .  (41)
+	Receiver : .  (43)
+
+	VOID  shift 12
+	BOOL  shift 13
+	INT  shift 14
+	STRING  shift 15
+	CLASS  shift 16
+	NULL  shift 47
+	THIS  shift 48
+	WHILE  shift 49
+	FOR  shift 50
+	IF  shift 51
+	RETURN  shift 52
+	BREAK  shift 53
+	NEW  shift 54
+	PRINT  shift 55
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'{'  shift 42
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	COMPLEX  shift 19
+	PRINTCOMP  shift 67
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	DO  shift 72
+	IDENTIFIER  reduce 43
+	';'  reduce 41
+
+	VariableDef  goto 73
+	Variable  goto 21
+	Type  goto 34
+	StmtBlock  goto 74
+	Stmt  goto 193
+	SimpleStmt  goto 76
+	IfStmt  goto 77
+	WhileStmt  goto 78
+	ForStmt  goto 79
+	ReturnStmt  goto 80
+	PrintStmt  goto 81
+	PrintCompStmt  goto 82
+	BreakStmt  goto 83
+	DoStmt  goto 84
+	LValue  goto 85
+	Expr  goto 86
+	Call  goto 87
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 176
+	ForStmt : FOR '(' SimpleStmt ';' . Expr ';' SimpleStmt ')' Stmt  (87)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 194
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 177
+	IfStmt : IF '(' Expr ')' . Stmt ElseClause  (94)
+	SimpleStmt : .  (41)
+	Receiver : .  (43)
+
+	VOID  shift 12
+	BOOL  shift 13
+	INT  shift 14
+	STRING  shift 15
+	CLASS  shift 16
+	NULL  shift 47
+	THIS  shift 48
+	WHILE  shift 49
+	FOR  shift 50
+	IF  shift 51
+	RETURN  shift 52
+	BREAK  shift 53
+	NEW  shift 54
+	PRINT  shift 55
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'{'  shift 42
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	COMPLEX  shift 19
+	PRINTCOMP  shift 67
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	DO  shift 72
+	IDENTIFIER  reduce 43
+	';'  reduce 41
+
+	VariableDef  goto 73
+	Variable  goto 21
+	Type  goto 34
+	StmtBlock  goto 74
+	Stmt  goto 195
+	SimpleStmt  goto 76
+	IfStmt  goto 77
+	WhileStmt  goto 78
+	ForStmt  goto 79
+	ReturnStmt  goto 80
+	PrintStmt  goto 81
+	PrintCompStmt  goto 82
+	BreakStmt  goto 83
+	DoStmt  goto 84
+	LValue  goto 85
+	Expr  goto 86
+	Call  goto 87
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 178
+	Expr : NEW IDENTIFIER '(' ')' .  (74)
+
+	.  reduce 74
+
+
+state 179
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	Expr : NEW Type '[' Expr . ']'  (75)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	'['  shift 138
+	']'  shift 196
+	.  error
+
+
+state 180
+	ExprList : ExprList ',' . Expr  (84)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 197
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 181
+	PrintStmt : PRINT '(' ExprList ')' .  (99)
+
+	.  reduce 99
+
+
+state 182
+	Expr : INSTANCEOF '(' Expr ',' . IDENTIFIER ')'  (76)
+
+	IDENTIFIER  shift 198
+	.  error
+
+
+state 183
+	Expr : '(' CLASS IDENTIFIER ')' . Expr  (77)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 199
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 184
+	PrintCompStmt : PRINTCOMP '(' ExprList ')' .  (100)
+
+	.  reduce 100
+
+
+state 185
+	Case : CASE '(' Expr ')' . '{' CasesList DefaultItem '}'  (88)
+
+	'{'  shift 200
+	.  error
+
+
+state 186
+	Expr : DCOPY '(' Expr ')' .  (78)
+
+	.  reduce 78
+
+
+state 187
+	Expr : SCOPY '(' Expr ')' .  (79)
+
+	.  reduce 79
+
+
+state 188
+	DoSubStmt : Expr ':' Stmt .  (104)
+
+	.  reduce 104
+
+
+state 189
+	DoBranch : DoBranch DOSEPARATOR DoSubStmt .  (102)
+
+	.  reduce 102
+
+
+state 190
+	LValue : Expr '[' Expr ']' .  (45)
+
+	.  reduce 45
+
+
+state 191
+	Call : Receiver IDENTIFIER '(' Actuals . ')'  (46)
+
+	')'  shift 201
+	.  error
+
+
+state 192
+	Actuals : ExprList .  (82)
+	ExprList : ExprList . ',' Expr  (84)
+
+	','  shift 180
+	')'  reduce 82
+
+
+state 193
+	WhileStmt : WHILE '(' Expr ')' Stmt .  (86)
+
+	.  reduce 86
+
+
+state 194
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	ForStmt : FOR '(' SimpleStmt ';' Expr . ';' SimpleStmt ')' Stmt  (87)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	';'  shift 202
+	'['  shift 138
+	.  error
+
+
+state 195
+	IfStmt : IF '(' Expr ')' Stmt . ElseClause  (94)
+	ElseClause : .  (96)
+
+	ELSE  shift 203
+	VOID  reduce 96
+	BOOL  reduce 96
+	INT  reduce 96
+	STRING  reduce 96
+	CLASS  reduce 96
+	NULL  reduce 96
+	THIS  reduce 96
+	WHILE  reduce 96
+	FOR  reduce 96
+	IF  reduce 96
+	RETURN  reduce 96
+	BREAK  reduce 96
+	NEW  reduce 96
+	PRINT  reduce 96
+	READ_INTEGER  reduce 96
+	READ_LINE  reduce 96
+	LITERAL  reduce 96
+	IDENTIFIER  reduce 96
+	INSTANCEOF  reduce 96
+	'-'  reduce 96
+	';'  reduce 96
+	'!'  reduce 96
+	'('  reduce 96
+	'{'  reduce 96
+	'}'  reduce 96
+	'@'  reduce 96
+	'$'  reduce 96
+	'#'  reduce 96
+	COMPLEX  reduce 96
+	PRINTCOMP  reduce 96
+	CASE  reduce 96
+	SUPER  reduce 96
+	DCOPY  reduce 96
+	SCOPY  reduce 96
+	DO  reduce 96
+	OD  reduce 96
+	DOSEPARATOR  reduce 96
+
+	ElseClause  goto 204
+
+
+state 196
+	Expr : NEW Type '[' Expr ']' .  (75)
+
+	.  reduce 75
+
+
+state 197
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	ExprList : ExprList ',' Expr .  (84)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	'['  shift 138
+	','  reduce 84
+	')'  reduce 84
+
+
+state 198
+	Expr : INSTANCEOF '(' Expr ',' IDENTIFIER . ')'  (76)
+
+	')'  shift 205
+	.  error
+
+
+state 199
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	Expr : '(' CLASS IDENTIFIER ')' Expr .  (77)
+
+	.  reduce 77
+
+
+state 200
+	Case : CASE '(' Expr ')' '{' . CasesList DefaultItem '}'  (88)
+	CasesList : .  (90)
+
+	.  reduce 90
+
+	CasesList  goto 206
+
+
+state 201
+	Call : Receiver IDENTIFIER '(' Actuals ')' .  (46)
+
+	.  reduce 46
+
+
+state 202
+	ForStmt : FOR '(' SimpleStmt ';' Expr ';' . SimpleStmt ')' Stmt  (87)
+	SimpleStmt : .  (41)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+	')'  reduce 41
+
+	SimpleStmt  goto 207
+	LValue  goto 85
+	Expr  goto 86
+	Call  goto 87
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 203
+	ElseClause : ELSE . Stmt  (95)
+	SimpleStmt : .  (41)
+	Receiver : .  (43)
+
+	VOID  shift 12
+	BOOL  shift 13
+	INT  shift 14
+	STRING  shift 15
+	CLASS  shift 16
+	NULL  shift 47
+	THIS  shift 48
+	WHILE  shift 49
+	FOR  shift 50
+	IF  shift 51
+	RETURN  shift 52
+	BREAK  shift 53
+	NEW  shift 54
+	PRINT  shift 55
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'{'  shift 42
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	COMPLEX  shift 19
+	PRINTCOMP  shift 67
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	DO  shift 72
+	IDENTIFIER  reduce 43
+	';'  reduce 41
+
+	VariableDef  goto 73
+	Variable  goto 21
+	Type  goto 34
+	StmtBlock  goto 74
+	Stmt  goto 208
+	SimpleStmt  goto 76
+	IfStmt  goto 77
+	WhileStmt  goto 78
+	ForStmt  goto 79
+	ReturnStmt  goto 80
+	PrintStmt  goto 81
+	PrintCompStmt  goto 82
+	BreakStmt  goto 83
+	DoStmt  goto 84
+	LValue  goto 85
+	Expr  goto 86
+	Call  goto 87
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 204
+	IfStmt : IF '(' Expr ')' Stmt ElseClause .  (94)
+
+	.  reduce 94
+
+
+state 205
+	Expr : INSTANCEOF '(' Expr ',' IDENTIFIER ')' .  (76)
+
+	.  reduce 76
+
+
+state 206
+	Case : CASE '(' Expr ')' '{' CasesList . DefaultItem '}'  (88)
+	CasesList : CasesList . CaseItem  (89)
+
+	NULL  shift 47
+	LITERAL  shift 58
+	DEFAULT  shift 209
+	.  error
+
+	Constant  goto 210
+	DefaultItem  goto 211
+	CaseItem  goto 212
+
+
+state 207
+	ForStmt : FOR '(' SimpleStmt ';' Expr ';' SimpleStmt . ')' Stmt  (87)
+
+	')'  shift 213
+	.  error
+
+
+state 208
+	ElseClause : ELSE Stmt .  (95)
+
+	.  reduce 95
+
+
+state 209
+	DefaultItem : DEFAULT . ':' Expr ';'  (92)
+
+	':'  shift 214
+	.  error
+
+
+state 210
+	CaseItem : Constant . ':' Expr ';'  (91)
+
+	':'  shift 215
+	.  error
+
+
+state 211
+	Case : CASE '(' Expr ')' '{' CasesList DefaultItem . '}'  (88)
+
+	'}'  shift 216
+	.  error
+
+
+state 212
+	CasesList : CasesList CaseItem .  (89)
+
+	.  reduce 89
+
+
+state 213
+	ForStmt : FOR '(' SimpleStmt ';' Expr ';' SimpleStmt ')' . Stmt  (87)
+	SimpleStmt : .  (41)
+	Receiver : .  (43)
+
+	VOID  shift 12
+	BOOL  shift 13
+	INT  shift 14
+	STRING  shift 15
+	CLASS  shift 16
+	NULL  shift 47
+	THIS  shift 48
+	WHILE  shift 49
+	FOR  shift 50
+	IF  shift 51
+	RETURN  shift 52
+	BREAK  shift 53
+	NEW  shift 54
+	PRINT  shift 55
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'{'  shift 42
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	COMPLEX  shift 19
+	PRINTCOMP  shift 67
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	DO  shift 72
+	IDENTIFIER  reduce 43
+	';'  reduce 41
+
+	VariableDef  goto 73
+	Variable  goto 21
+	Type  goto 34
+	StmtBlock  goto 74
+	Stmt  goto 217
+	SimpleStmt  goto 76
+	IfStmt  goto 77
+	WhileStmt  goto 78
+	ForStmt  goto 79
+	ReturnStmt  goto 80
+	PrintStmt  goto 81
+	PrintCompStmt  goto 82
+	BreakStmt  goto 83
+	DoStmt  goto 84
+	LValue  goto 85
+	Expr  goto 86
+	Call  goto 87
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 214
+	DefaultItem : DEFAULT ':' . Expr ';'  (92)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 218
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 215
+	CaseItem : Constant ':' . Expr ';'  (91)
+	Receiver : .  (43)
+
+	NULL  shift 47
+	THIS  shift 48
+	NEW  shift 54
+	READ_INTEGER  shift 56
+	READ_LINE  shift 57
+	LITERAL  shift 58
+	INSTANCEOF  shift 59
+	'-'  shift 60
+	'!'  shift 61
+	'('  shift 62
+	'@'  shift 64
+	'$'  shift 65
+	'#'  shift 66
+	CASE  shift 68
+	SUPER  shift 69
+	DCOPY  shift 70
+	SCOPY  shift 71
+	IDENTIFIER  reduce 43
+
+	LValue  goto 94
+	Expr  goto 219
+	Call  goto 96
+	Receiver  goto 88
+	Constant  goto 89
+	Case  goto 90
+
+
+state 216
+	Case : CASE '(' Expr ')' '{' CasesList DefaultItem '}' .  (88)
+
+	.  reduce 88
+
+
+state 217
+	ForStmt : FOR '(' SimpleStmt ';' Expr ';' SimpleStmt ')' Stmt .  (87)
+
+	.  reduce 87
+
+
+state 218
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	DefaultItem : DEFAULT ':' Expr . ';'  (92)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	';'  shift 220
+	'['  shift 138
+	.  error
+
+
+state 219
+	Receiver : Expr . '.'  (42)
+	LValue : Expr . '[' Expr ']'  (45)
+	Expr : Expr . '+' Expr  (51)
+	Expr : Expr . '-' Expr  (52)
+	Expr : Expr . '*' Expr  (53)
+	Expr : Expr . '/' Expr  (54)
+	Expr : Expr . '%' Expr  (55)
+	Expr : Expr . EQUAL Expr  (56)
+	Expr : Expr . NOT_EQUAL Expr  (57)
+	Expr : Expr . '<' Expr  (58)
+	Expr : Expr . '>' Expr  (59)
+	Expr : Expr . LESS_EQUAL Expr  (60)
+	Expr : Expr . GREATER_EQUAL Expr  (61)
+	Expr : Expr . AND Expr  (62)
+	Expr : Expr . OR Expr  (63)
+	CaseItem : Constant ':' Expr . ';'  (91)
+
+	AND  shift 124
+	OR  shift 125
+	LESS_EQUAL  shift 126
+	GREATER_EQUAL  shift 127
+	EQUAL  shift 128
+	NOT_EQUAL  shift 129
+	'+'  shift 130
+	'-'  shift 131
+	'*'  shift 132
+	'/'  shift 133
+	'%'  shift 134
+	'>'  shift 135
+	'<'  shift 136
+	'.'  shift 137
+	';'  shift 221
+	'['  shift 138
+	.  error
+
+
+state 220
+	DefaultItem : DEFAULT ':' Expr ';' .  (92)
+
+	.  reduce 92
+
+
+state 221
+	CaseItem : Constant ':' Expr ';' .  (91)
+
+	.  reduce 91
+
+
+64 terminals, 38 nonterminals
+105 grammar rules, 222 states
