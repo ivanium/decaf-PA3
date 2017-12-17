@@ -10,6 +10,8 @@ public class BaseType extends Type {
 
 	public static final BaseType INT = new BaseType("int");
 	
+	public static final BaseType COMPLEX = new BaseType("complex");
+	
 	public static final BaseType BOOL = new BaseType("bool");
 
 	public static final BaseType NULL = new BaseType("null");

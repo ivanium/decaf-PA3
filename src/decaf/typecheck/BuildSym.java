@@ -4,6 +4,8 @@ import java.util.Iterator;
 
 import decaf.Driver;
 import decaf.tree.Tree;
+import decaf.tree.Tree.Case;
+import decaf.tree.Tree.DoStmt;
 import decaf.error.BadArrElementError;
 import decaf.error.BadInheritanceError;
 import decaf.error.BadOverrideError;
@@ -164,6 +166,9 @@ public class BuildSym extends Tree.Visitor {
 		case Tree.INT:
 			type.type = BaseType.INT;
 			break;
+		case Tree.COMPLEX:
+			type.type = BaseType.COMPLEX;
+			break;
 		case Tree.BOOL:
 			type.type = BaseType.BOOL;
 			break;
@@ -213,6 +218,20 @@ public class BuildSym extends Tree.Visitor {
 	public void visitForLoop(Tree.ForLoop forLoop) {
 		if (forLoop.loopBody != null) {
 			forLoop.loopBody.accept(this);
+		}
+	}
+
+	@Override
+	public void visitDoStmt(Tree.DoStmt doStmt) {
+		for(Tree s : doStmt.doBody) {
+			s.accept(this);
+		}
+	}
+
+	@Override
+	public void visitDoSubStmt(Tree.DoSubStmt doSubStmt) {
+		if(doSubStmt.body != null) {
+			doSubStmt.body.accept(this);
 		}
 	}
 
