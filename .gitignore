@@ -1,0 +1,5 @@
+*.pdf
+*.xml
+TestCases/*
+*.py
+tools/*
