@@ -3,6 +3,9 @@ package decaf.translate;
 import java.util.Stack;
 
 import decaf.tree.Tree;
+import decaf.tree.Tree.CaseItem;
+import decaf.tree.Tree.DefaultItem;
+import decaf.tree.Tree.DoSubStmt;
 import decaf.backend.OffsetCounter;
 import decaf.machdesc.Intrinsic;
 import decaf.symbol.Variable;
@@ -65,17 +68,21 @@ public class TransPass2 extends Tree.Visitor {
 		switch (expr.tag) {
 		case Tree.PLUS:
 			expr.val = tr.genAdd(expr.left.val, expr.right.val);
+			// expr.imgVal = tr.genAdd(expr.left.imgVal, expr.right.imgVal);l);l);l);l);l);l);l);l);l);l);l);
 			break;
 		case Tree.MINUS:
 			expr.val = tr.genSub(expr.left.val, expr.right.val);
 			break;
 		case Tree.MUL:
 			expr.val = tr.genMul(expr.left.val, expr.right.val);
+			// expr.imgVal = tr.genMul(expr.left.imgVal, expr.right.imgVal);l);l);l);l);l);
 			break;
 		case Tree.DIV:
+			tr.genDivideByZero(expr.right.val);
 			expr.val = tr.genDiv(expr.left.val, expr.right.val);
 			break;
 		case Tree.MOD:
+			tr.genDivideByZero(expr.right.val);		
 			expr.val = tr.genMod(expr.left.val, expr.right.val);
 			break;
 		case Tree.AND:
@@ -151,12 +158,21 @@ public class TransPass2 extends Tree.Visitor {
 		switch (literal.typeTag) {
 		case Tree.INT:
 			literal.val = tr.genLoadImm4(((Integer)literal.value).intValue());
+			// literal.imgVal = tr.genLoadImm4(0);0);0);0);0);0);0);0);0);0);0);0);0);0);0);0);0);0);0);0);0);0);0);0);
+			break;
+		case Tree.COMPLEX:
+		case Tree.IMG:
+			literal.val = tr.genLoadImm4(((Integer)literal.value).intValue());
+			// literal.val = tr.genLoadImm4(0);
+			// literal.imgVal = tr.genLoadImm4(((Integer)literal.value).intValue());
 			break;
 		case Tree.BOOL:
 			literal.val = tr.genLoadImm4((Boolean)(literal.value) ? 1 : 0);
+			// literal.imgVal = tr.genLoadImm4(0);			
 			break;
 		default:
 			literal.val = tr.genLoadStrConst((String)literal.value);
+			// literal.imgVal = tr.genLoadImm4(0);
 		}
 	}
 
@@ -171,9 +187,25 @@ public class TransPass2 extends Tree.Visitor {
 		switch (expr.tag){
 		case Tree.NEG:
 			expr.val = tr.genNeg(expr.expr.val);
+			// expr.imgVal = tr.genNeg(expr.expr.imgVal);l);l);
+			break;
+		case Tree.RE:
+			expr.val = expr.expr.val;
+			// expr.imgVal = tr.genLoadImm4(0);0);
+			break;
+		case Tree.IM:
+			expr.val = expr.expr.imgVal;
+			// expr.imgVal = tr.genLoadImm4(0);
+			break;
+		case Tree.COMPCAST:
+			expr.val = expr.expr.val;
+			// expr.imgVal = tr.genLoadImm4(0);
+			break;
+		case Tree.NOT:
+			expr.val = tr.genLNot(expr.expr.val);
 			break;
 		default:
-			expr.val = tr.genLNot(expr.expr.val);
+			break;
 		}
 	}
 
@@ -230,6 +262,15 @@ public class TransPass2 extends Tree.Visitor {
 		}
 	}
 
+	// @Override
+	// public void visitPrintComp(Tree.PrintComp printCompStmt) {
+	// 	for (Tree.Expr r : printCompStmt.exprs) {
+	// 		r.accept(this);
+	// 		tr.genParm(r.val);
+	// 		tr.genParm(r.imgVal);
+	// 		tr.genIntrinsicCall(Intrinsic.PRINT_COMPLEX);
+	// 	}
+	
 	@Override
 	public void visitIndexed(Tree.Indexed indexed) {
 		indexed.array.accept(this);
@@ -285,7 +326,7 @@ public class TransPass2 extends Tree.Visitor {
 			if (callExpr.receiver == null) {
 				callExpr.val = tr.genDirectCall(
 						callExpr.symbol.getFuncty().label, callExpr.symbol
-								.getReturnType());
+						.getReturnType());
 			} else {
 				Temp vt = tr.genLoad(callExpr.receiver.val, 0);
 				Temp func = tr.genLoad(vt, callExpr.symbol.getOffset());
@@ -368,6 +409,55 @@ public class TransPass2 extends Tree.Visitor {
 		}
 		tr.genBranch(loop);
 		loopExits.pop();
+		tr.genMark(exit);
+	}
+
+	@Override
+	public void visitCase(Tree.Case caseExpr) {
+		caseExpr.condition.accept(this);
+		Label exit = Label.createLabel();
+		for (Tree cs : caseExpr.caseList) {
+			Label next = Label.createLabel();
+			Tree.CaseItem e = ((CaseItem)cs);
+			e.constant.accept(this);
+			Temp t = tr.genSub(caseExpr.condition.val, e.constant.val);
+			tr.genBnez(t, next);
+			if(e.body != null) {
+				e.body.accept(this);
+			}
+			// tr.genAssign(caseExpr.val, e.body.val);
+			caseExpr.val = e.body.val;
+			tr.genBranch(exit);
+			tr.genMark(next);
+			loopExits.pop();
+			tr.genMark(next);
+		}
+		Tree.DefaultItem d = (DefaultItem)caseExpr.defaultItem;
+		if(d.body != null) {
+			d.body.accept(this);
+		}
+		// caseExpr.val = d.body.val;
+		tr.genMark(exit);
+	}
+
+	@Override
+	public void visitDoStmt(Tree.DoStmt doStmt) {
+		Label loop = Label.createLabel();
+		tr.genMark(loop);
+		Label exit = Label.createLabel();
+		for(Tree s : doStmt.doBody) {
+			Label next = Label.createLabel();
+			Tree.DoSubStmt ds = ((DoSubStmt)s);
+			ds.cond.accept(this);
+			tr.genBeqz(ds.cond.val, next);
+			loopExits.push(exit);
+			if(ds.body != null) {
+				ds.body.accept(this);
+			}
+			tr.genBranch(loop);
+			loopExits.pop();
+			tr.genMark(next);
+		}
 		tr.genMark(exit);
 	}
 
