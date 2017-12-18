@@ -594,11 +594,11 @@ public class TypeCheck extends Tree.Visitor {
 	}
 
 	@Override
-public void visitDefaultItem(Tree.DefaultItem defaultItem) {
-			if(defaultItem.body != null) {
-					defaultItem.body.accept(this);
-					defaultItem.type = defaultItem.body.type;
-	}
+	public void visitDefaultItem(Tree.DefaultItem defaultItem) {
+				if(defaultItem.body != null) {
+						defaultItem.body.accept(this);
+						defaultItem.type = defaultItem.body.type;
+		}
 	}
 
 	@Override
