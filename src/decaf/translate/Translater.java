@@ -438,6 +438,13 @@ public class Translater {
 		endFunc();
 	}
 
+	public Temp genComplex() {
+		Temp size = genLoadImm4(OffsetCounter.WORD_SIZE * 2);
+		genParm(size);
+		Temp newObj = genIntrinsicCall(Intrinsic.ALLOCATE);
+		return newObj;
+	}
+
 	public Temp genInstanceof(Temp instance, Class c) {
 		Temp dst = Temp.createTempI4();
 		Label loop = Label.createLabel();
