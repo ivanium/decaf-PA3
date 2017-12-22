@@ -1,6 +1,7 @@
 package decaf.translate;
 
 import java.util.Stack;
+import java.util.Iterator;
 
 import decaf.tree.Tree;
 import decaf.tree.Tree.CaseItem;
@@ -8,10 +9,14 @@ import decaf.tree.Tree.DefaultItem;
 import decaf.tree.Tree.DoSubStmt;
 import decaf.backend.OffsetCounter;
 import decaf.machdesc.Intrinsic;
+import decaf.scope.ClassScope;
 import decaf.symbol.Variable;
+import decaf.symbol.Class;
+import decaf.symbol.Symbol;
 import decaf.tac.Label;
 import decaf.tac.Temp;
 import decaf.type.BaseType;
+import decaf.type.ClassType;
 
 public class TransPass2 extends Tree.Visitor {
 
@@ -183,7 +188,6 @@ public class TransPass2 extends Tree.Visitor {
     case Tree.INT:
       literal.val = tr.genLoadImm4(((Integer)literal.value).intValue());
       break;
-    // case Tree.COMPLEX:
     case Tree.IMG:
       literal.val = tr.genComplex();
       Temp zero = tr.genLoadImm4(0);
@@ -193,11 +197,9 @@ public class TransPass2 extends Tree.Visitor {
       break;
     case Tree.BOOL:
       literal.val = tr.genLoadImm4((Boolean)(literal.value) ? 1 : 0);
-      // literal.imgVal = tr.genLoadImm4(0);
       break;
     default:
       literal.val = tr.genLoadStrConst((String)literal.value);
-      // literal.imgVal = tr.genLoadImm4(0);
     }
   }
 
@@ -247,6 +249,11 @@ public class TransPass2 extends Tree.Visitor {
   @Override
   public void visitThisExpr(Tree.ThisExpr thisExpr) {
     thisExpr.val = currentThis;
+  }
+
+  @Override
+  public void visitSuperExpr(Tree.SuperExpr superExpr) {
+    superExpr.val = currentThis;
   }
 
   @Override
@@ -358,11 +365,18 @@ public class TransPass2 extends Tree.Visitor {
         callExpr.val = tr.genDirectCall(
             callExpr.symbol.getFuncty().label, callExpr.symbol
             .getReturnType());
+        
       } else {
-        Temp vt = tr.genLoad(callExpr.receiver.val, 0);
-        Temp func = tr.genLoad(vt, callExpr.symbol.getOffset());
-        callExpr.val = tr.genIndirectCall(func, callExpr.symbol
-            .getReturnType());
+        if(callExpr.receiver.tag == Tree.SUPEREXPR) {
+          Temp vt = tr.genLoad(tr.genLoad(callExpr.receiver.val, 0), 0);
+          Temp func = tr.genLoad(vt, callExpr.symbol.getOffset());
+          callExpr.val = tr.genIndirectCall(func, callExpr.symbol.getReturnType());
+        } else {
+          Temp vt = tr.genLoad(callExpr.receiver.val, 0);
+          Temp func = tr.genLoad(vt, callExpr.symbol.getOffset());
+          callExpr.val = tr.genIndirectCall(func, callExpr.symbol
+              .getReturnType());
+        }
       }
     }
   }
@@ -456,7 +470,6 @@ public class TransPass2 extends Tree.Visitor {
       if(e.body != null) {
         e.body.accept(this);
       }
-      // tr.genAssign(caseExpr.val, e.body.val);
       tr.genAssign(caseExpr.val, e.body.val);
       tr.genBranch(exit);
       tr.genMark(next);
@@ -492,12 +505,46 @@ public class TransPass2 extends Tree.Visitor {
 
   @Override
   public void visitDcopy(Tree.Dcopy dcopy) {
-
+    dcopy.dcopyExpr.accept(this);
+    Class c = ((ClassType)dcopy.dcopyExpr.type).getSymbol();
+    Temp loc = dcopy.dcopyExpr.val;
+    Temp newObj = tr.genFuncForDcopy(c, loc);
+    dcopy.val = newObj;
   }
 
   @Override
   public void visitScopy(Tree.Scopy scopy) {
-    
+    scopy.scopyExpr.accept(this);
+    Class c = ((ClassType)scopy.scopyExpr.type).getSymbol();
+    Temp size = tr.genLoadImm4(c.getSize());
+    tr.genParm(size);
+    Temp newObj = tr.genIntrinsicCall(Intrinsic.ALLOCATE);
+    int time = c.getSize() / OffsetCounter.WORD_SIZE;
+    if (time != 0) {
+      Temp oldObj = scopy.scopyExpr.val;
+      Temp zero = tr.genLoadImm4(0);
+      if (time < 5) {
+        for (int i = 0; i < time; i++) {
+          tr.genStore(tr.genLoad(oldObj, OffsetCounter.WORD_SIZE * i), newObj, OffsetCounter.WORD_SIZE * i);
+        }
+      } else {
+        Temp unit = tr.genLoadImm4(OffsetCounter.WORD_SIZE);
+        Label loop = Label.createLabel();
+        Label exit = Label.createLabel();
+        newObj = tr.genAdd(newObj, size);
+        oldObj = tr.genAdd(oldObj, size);
+        tr.genMark(loop);
+        tr.genAssign(newObj, tr.genSub(newObj, unit));
+        tr.genAssign(oldObj, tr.genSub(oldObj, unit));
+        tr.genAssign(size, tr.genSub(size, unit));
+        tr.genBeqz(size, exit);
+        tr.genStore(tr.genLoad(oldObj, 0), newObj, 0);
+        tr.genBranch(loop);
+        tr.genMark(exit);
+      }
+    }
+    tr.genStore(tr.genLoadVTable(c.getVtable()), newObj, 0);
+    scopy.val = newObj;
   }
 
   @Override
