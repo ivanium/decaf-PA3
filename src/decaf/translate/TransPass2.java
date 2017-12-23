@@ -367,16 +367,27 @@ public class TransPass2 extends Tree.Visitor {
             .getReturnType());
         
       } else {
-        if(callExpr.receiver.tag == Tree.SUPEREXPR) {
-          Temp vt = tr.genLoad(tr.genLoad(callExpr.receiver.val, 0), 0);
-          Temp func = tr.genLoad(vt, callExpr.symbol.getOffset());
-          callExpr.val = tr.genIndirectCall(func, callExpr.symbol.getReturnType());
-        } else {
-          Temp vt = tr.genLoad(callExpr.receiver.val, 0);
-          Temp func = tr.genLoad(vt, callExpr.symbol.getOffset());
-          callExpr.val = tr.genIndirectCall(func, callExpr.symbol
-              .getReturnType());
-        }
+        // if(callExpr.receiver.tag == Tree.SUPEREXPR) {
+        //   // Temp vt = tr.genLoadVTable(((ClassType)(callExpr.receiver.type)).getSymbol().getVtable());
+        //   Temp vt = tr.genLoadVTable(((ClassType)(callExpr.receiver.type)).getParentType().getSymbol().getVtable());
+        //   Temp func = tr.genLoad(vt, callExpr.symbol.getOffset());
+        //   callExpr.val = tr.genIndirectCall(func, callExpr.symbol.getReturnType());
+        // } else {
+        //   Temp vt = tr.genLoadVTable(((ClassType)(callExpr.receiver.type)).getSymbol().getVtable());
+        //   // Temp vt = tr.genLoad(callExpr.receiver.val, 0);
+        //   Temp func = tr.genLoad(vt, callExpr.symbol.getOffset());
+        //   callExpr.val = tr.genIndirectCall(func, callExpr.symbol
+        //       .getReturnType());
+        // }
+        Temp vt;
+        // if(callExpr.receiver.tag == Tree.SUPEREXPR) {
+          vt = tr.genLoadVTable(((ClassType)(callExpr.receiver.type)).getSymbol().getVtable());
+        // } else {
+          // vt = tr.genLoadVTable(((ClassType)(callExpr.receiver.type)).getSymbol().getVtable());
+        // }
+        Temp func = tr.genLoad(vt, callExpr.symbol.getOffset());
+        callExpr.val = tr.genIndirectCall(func, callExpr.symbol
+            .getReturnType());
       }
     }
   }

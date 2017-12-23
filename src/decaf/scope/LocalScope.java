@@ -8,9 +8,20 @@ import decaf.utils.IndentPrintWriter;
 public class LocalScope extends Scope {
 
 	private Block node;
+	
+	private boolean misCombinedtoFormal;
 
 	public LocalScope(Block node) {
 		this.node = node;
+		misCombinedtoFormal = false;
+	}
+	
+	public void setCombinedtoFormal(boolean combined){
+		misCombinedtoFormal = combined;
+	}
+	
+	public boolean isCombinedtoFormal(){
+		return misCombinedtoFormal;
 	}
 
 	@Override
